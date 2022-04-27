@@ -5,6 +5,9 @@ import { CodeBuildAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipelin
 import { Construct } from 'constructs';
 
 export class PipelineStack extends Stack {
+  private sourceOutput: Artifact;
+  private buildOutput: Artifact;
+
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -20,8 +23,20 @@ export class PipelineStack extends Stack {
       crossAccountKeys: false,
     });
 
+    // add source stage
+    this._addSourceStage(pipeline);
+
+    // add build stage
+    this._addBuildStage(pipeline);
+
+
+    return pipeline;
+  }
+
+  private _addSourceStage(pipeline: Pipeline): void {
+
     // create source output artifact
-    const sourceOutput = new Artifact('SourceOutput');
+    this.sourceOutput = new Artifact('SourceOutput');
 
     // add source stage
     pipeline.addStage({
@@ -33,13 +48,16 @@ export class PipelineStack extends Stack {
           repo: 'jo-aws-cdk-pipeline-gh',
           branch: 'main',
           oauthToken: SecretValue.secretsManager('github-token'),
-          output: sourceOutput,
+          output: this.sourceOutput,
         }),
       ]
-    });
+    });    
+  }
+
+  private _addBuildStage(pipeline: Pipeline): void {
 
     // create build output artifact
-    const buildOutput = new Artifact('BuildOutput');
+    this.buildOutput = new Artifact('BuildOutput');
 
     // add build stage
     pipeline.addStage({
@@ -47,9 +65,9 @@ export class PipelineStack extends Stack {
       actions: [
         new CodeBuildAction({
           actionName: 'Pipeline_Build',
-          input: sourceOutput,
+          input: this.sourceOutput,
           outputs: [
-            buildOutput,
+            this.buildOutput,
           ],
           project: new PipelineProject(this, 'BuildProject', {
             environment: {
@@ -60,7 +78,5 @@ export class PipelineStack extends Stack {
         }),
       ]
     });
-
-    return pipeline;
   }
 }
