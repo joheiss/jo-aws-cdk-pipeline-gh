@@ -2,7 +2,7 @@ import { App, Stack } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
 import { PipelineStack } from '../lib/pipeline-stack';
 
-describe('Monthly Cost Budget Warning Stack', () => {
+describe('Pipeline Stack', () => {
 
     let app: App;
     let stack: PipelineStack;

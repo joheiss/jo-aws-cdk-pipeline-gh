@@ -4,5 +4,12 @@ module.exports = {
   testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
-  }
+  },
+  reporters: [
+    'default',
+    [ 'jest-junit', {
+      outputDirectory: 'test/test-reports',
+      outputName: 'test-report.xml',
+    } ]
+  ]  
 };
