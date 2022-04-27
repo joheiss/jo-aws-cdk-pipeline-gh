@@ -23,6 +23,7 @@ export class PipelineStack extends Stack {
     const pipeline = new Pipeline(this, 'Pipeline', {
       pipelineName: 'Pipeline',
       crossAccountKeys: false,
+      restartExecutionOnUpdate: true,
     });
 
     // add source stage
