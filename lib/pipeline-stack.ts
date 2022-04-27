@@ -5,8 +5,9 @@ import { CloudFormationCreateUpdateStackAction, CodeBuildAction, GitHubSourceAct
 import { Construct } from 'constructs';
 
 export class PipelineStack extends Stack {
-  private sourceOutput: Artifact;
-  private buildOutput: Artifact;
+  private cdkSourceOutput: Artifact;
+  private serviceSourceOutput: Artifact;
+  private cdkBuildOutput: Artifact;
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -38,7 +39,8 @@ export class PipelineStack extends Stack {
   private _addSourceStage(pipeline: Pipeline): void {
 
     // create source output artifact
-    this.sourceOutput = new Artifact('SourceOutput');
+    this.cdkSourceOutput = new Artifact('CdkSourceOutput');
+    this.serviceSourceOutput = new Artifact('ServiceSourceOutput');
 
     // add source stage
     pipeline.addStage({
@@ -50,8 +52,17 @@ export class PipelineStack extends Stack {
           repo: 'jo-aws-cdk-pipeline-gh',
           branch: 'main',
           oauthToken: SecretValue.secretsManager('github-token'),
-          output: this.sourceOutput,
+          output: this.cdkSourceOutput,
         }),
+        new GitHubSourceAction({
+          actionName: 'Service_Source',
+          owner: 'joheiss',
+          repo: 'jo-aws-express-app',
+          branch: 'main',
+          oauthToken: SecretValue.secretsManager('github-token'),
+          output: this.serviceSourceOutput,
+        }),
+
       ]
     });    
   }
@@ -59,7 +70,7 @@ export class PipelineStack extends Stack {
   private _addBuildStage(pipeline: Pipeline): void {
 
     // create build output artifact
-    this.buildOutput = new Artifact('BuildOutput');
+    this.cdkBuildOutput = new Artifact('CdkBuildOutput');
 
     // add build stage
     pipeline.addStage({
@@ -67,9 +78,9 @@ export class PipelineStack extends Stack {
       actions: [
         new CodeBuildAction({
           actionName: 'Pipeline_Build',
-          input: this.sourceOutput,
+          input: this.cdkSourceOutput,
           outputs: [
-            this.buildOutput,
+            this.cdkBuildOutput,
           ],
           project: new PipelineProject(this, 'BuildProject', {
             environment: {
@@ -90,7 +101,7 @@ export class PipelineStack extends Stack {
         new CloudFormationCreateUpdateStackAction({
           actionName: 'Pipeline_Update',
           stackName: 'PipelineStack',
-          templatePath: this.buildOutput.atPath('PipelineStack.template.json'),
+          templatePath: this.cdkBuildOutput.atPath('PipelineStack.template.json'),
           adminPermissions: true,
         })
       ]
