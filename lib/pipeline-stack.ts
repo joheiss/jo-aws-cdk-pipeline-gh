@@ -8,6 +8,7 @@ export class PipelineStack extends Stack {
   private cdkSourceOutput: Artifact;
   private serviceSourceOutput: Artifact;
   private cdkBuildOutput: Artifact;
+  private serviceBuildOutput: Artifact;
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -71,6 +72,7 @@ export class PipelineStack extends Stack {
 
     // create build output artifact
     this.cdkBuildOutput = new Artifact('CdkBuildOutput');
+    this.serviceBuildOutput = new Artifact('ServiceBuildOutput');
 
     // add build stage
     pipeline.addStage({
@@ -82,13 +84,27 @@ export class PipelineStack extends Stack {
           outputs: [
             this.cdkBuildOutput,
           ],
-          project: new PipelineProject(this, 'BuildProject', {
+          project: new PipelineProject(this, 'CdkBuildProject', {
             environment: {
               buildImage: LinuxBuildImage.STANDARD_5_0,
             },
-            buildSpec: BuildSpec.fromSourceFilename('buildspecs/buildspec.yml'),
+            buildSpec: BuildSpec.fromSourceFilename('buildspecs/cdk-buildspec.yml'),
           }),
         }),
+        new CodeBuildAction({
+          actionName: 'Service_Build',
+          input: this.serviceSourceOutput,
+          outputs: [
+            this.serviceBuildOutput,
+          ],
+          project: new PipelineProject(this, 'ServiceBuildProject', {
+            environment: {
+              buildImage: LinuxBuildImage.STANDARD_5_0,
+            },
+            buildSpec: BuildSpec.fromSourceFilename('buildspecs/service-buildspec.yml'),
+          }),
+        }),
+
       ]
     });
   }
