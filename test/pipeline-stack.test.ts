@@ -1,17 +1,19 @@
-// import * as cdk from 'aws-cdk-lib';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as JoAwsCdkPipelineGh from '../lib/jo-aws-cdk-pipeline-gh-stack';
+import { App, Stack } from "aws-cdk-lib";
+import { Template } from "aws-cdk-lib/assertions";
+import { PipelineStack } from '../lib/pipeline-stack';
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/jo-aws-cdk-pipeline-gh-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new JoAwsCdkPipelineGh.JoAwsCdkPipelineGhStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+describe('Monthly Cost Budget Warning Stack', () => {
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+    let app: App;
+    let stack: PipelineStack;
+    
+    beforeAll(() => {
+        app = new App();
+        stack = new PipelineStack(app, 'PipelineStack');
+    });
+
+    test('Stack', () => {
+        const cfn = Template.fromStack(stack).toJSON();
+        expect(cfn).toMatchSnapshot();
+    });
 });
