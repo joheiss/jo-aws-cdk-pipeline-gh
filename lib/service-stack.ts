@@ -19,10 +19,9 @@ export class ServiceStack extends Stack {
             memorySize: 128,
             timeout: Duration.seconds(3),
             runtime: Runtime.NODEJS_14_X,
-            handler: 'handler',
+            handler: 'src/lambda.handler',
             code: this.serviceCode,
             functionName: 'ServiceLambda',
-
         });
         
         // const lambdaFn = new NodejsFunction(this, 'LambdaFunction', {
