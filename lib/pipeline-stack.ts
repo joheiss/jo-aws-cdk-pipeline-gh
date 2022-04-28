@@ -19,6 +19,7 @@ import { Topic } from "aws-cdk-lib/aws-sns";
 import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 import { SnsTopic } from "aws-cdk-lib/aws-events-targets";
 import { EventField, RuleTargetInput } from "aws-cdk-lib/aws-events";
+import { PropagatedTagSource } from "aws-cdk-lib/aws-ecs";
 
 interface PipelineStackProps extends StackProps {
   ownerEmail?: string;
@@ -31,12 +32,14 @@ export class PipelineStack extends Stack {
   private cdkBuildOutput: Artifact;
   private serviceBuildOutput: Artifact;
   private readonly snsTopic: Topic;
+  private readonly emailAddress: string;
 
   constructor(scope: Construct, id: string, props?: PipelineStackProps) {
     super(scope, id, props);
 
     if (props?.ownerEmail) {
-      this.snsTopic = this._createSnsTopic(props.ownerEmail);
+      this.emailAddress = props.ownerEmail;
+      this.snsTopic = this._createSnsTopic();
     }
     this.pipeline = this._createCodePipeline();
   }
@@ -85,25 +88,27 @@ export class PipelineStack extends Stack {
       runOrder: 2,
     });
     stage.addAction(testAction);
-    testAction.onStateChange(
-      "TestFailed",
-      new SnsTopic(this.snsTopic, {
-        message: RuleTargetInput.fromText(
-          `Test failed. See details here: ${EventField.fromPath(
-            "$.detail.execution-result.external-execution-url"
-          )}`
-        ),
-      }),
-      {
-        ruleName: "TestFailed",
-        eventPattern: {
-          detail: {
-            state: ["FAILED"],
+    if (this.emailAddress) {
+      testAction.onStateChange(
+        "TestFailed",
+        new SnsTopic(this.snsTopic, {
+          message: RuleTargetInput.fromText(
+            `Test failed. See details here: ${EventField.fromPath(
+              "$.detail.execution-result.external-execution-url"
+            )}`
+          ),
+        }),
+        {
+          ruleName: "TestFailed",
+          eventPattern: {
+            detail: {
+              state: ["FAILED"],
+            },
           },
-        },
-        description: "Test has failed",
-      }
-    );
+          description: "Test has failed",
+        }
+      );
+    }
   }
 
   public addBillingStackToDeployStage(
@@ -122,12 +127,12 @@ export class PipelineStack extends Stack {
     );
   }
 
-  private _createSnsTopic(ownerEmail: string): Topic {
+  private _createSnsTopic(): Topic {
     const topic = new Topic(this, "NotifyOnFailedPipeline", {
       topicName: "NotifyOnFailedPipeline",
     });
 
-    topic.addSubscription(new EmailSubscription(ownerEmail));
+    topic.addSubscription(new EmailSubscription(this.emailAddress));
 
     return topic;
   }
