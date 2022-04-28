@@ -16,10 +16,8 @@ import { Construct } from "constructs";
 import { ServiceStack } from "./service-stack";
 import { BillingStack } from "./billing-stack";
 import { Topic } from "aws-cdk-lib/aws-sns";
-import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 import { SnsTopic } from "aws-cdk-lib/aws-events-targets";
 import { EventField, RuleTargetInput } from "aws-cdk-lib/aws-events";
-import { PropagatedTagSource } from "aws-cdk-lib/aws-ecs";
 
 interface PipelineStackProps extends StackProps {
   ownerEmail?: string;
@@ -88,7 +86,7 @@ export class PipelineStack extends Stack {
       runOrder: 2,
     });
     stage.addAction(testAction);
-    if (this.emailAddress) {
+    if (this.snsTopic) {
       testAction.onStateChange(
         "TestFailed",
         new SnsTopic(this.snsTopic, {
