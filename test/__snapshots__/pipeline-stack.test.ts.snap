@@ -200,6 +200,22 @@ Object {
       },
       "Type": "AWS::IAM::Role",
     },
+    "NotifyOnFailedPipeline67CBA9FC": Object {
+      "Properties": Object {
+        "TopicName": "NotifyOnFailedPipeline",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "NotifyOnFailedPipelinetesttestdeFF5239F1": Object {
+      "Properties": Object {
+        "Endpoint": "test@test.de",
+        "Protocol": "email",
+        "TopicArn": Object {
+          "Ref": "NotifyOnFailedPipeline67CBA9FC",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "PipelineArtifactsBucket22248F97": Object {
       "DeletionPolicy": "Retain",
       "Properties": Object {
