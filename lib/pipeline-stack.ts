@@ -32,7 +32,7 @@ export class PipelineStack extends Stack {
   private cdkBuildOutput: Artifact;
   private serviceBuildOutput: Artifact;
   private readonly snsTopic: Topic;
-  private readonly emailAddress: string;
+  private readonly emailAddress?: string;
 
   constructor(scope: Construct, id: string, props?: PipelineStackProps) {
     super(scope, id, props);
@@ -132,7 +132,7 @@ export class PipelineStack extends Stack {
       topicName: "NotifyOnFailedPipeline",
     });
 
-    topic.addSubscription(new EmailSubscription(this.emailAddress));
+    // topic.addSubscription(new EmailSubscription(this.emailAddress!));
 
     return topic;
   }
