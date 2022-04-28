@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Monthly Cost Budget Warning Stack Stack 1`] = `
+Object {
+  "Parameters": Object {
+    "BootstrapVersion": Object {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": Object {
+    "BudgetWarningmyBudget7091B012": Object {
+      "Properties": Object {
+        "Budget": Object {
+          "BudgetLimit": Object {
+            "Amount": 10,
+            "Unit": "USD",
+          },
+          "BudgetName": "MonthlyCostBudgetWarning",
+          "BudgetType": "COST",
+          "TimeUnit": "MONTHLY",
+        },
+        "NotificationsWithSubscribers": Array [
+          Object {
+            "Notification": Object {
+              "ComparisonOperator": "GREATER_THAN",
+              "NotificationType": "ACTUAL",
+              "Threshold": 100,
+              "ThresholdType": "PERCENTAGE",
+            },
+            "Subscribers": Array [
+              Object {
+                "Address": Object {
+                  "Ref": "MonthlyCostBudgetWarningTopic938BE3FB",
+                },
+                "SubscriptionType": "SNS",
+              },
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::Budgets::Budget",
+    },
+    "MonthlyCostBudgetWarningTopic938BE3FB": Object {
+      "Properties": Object {
+        "DisplayName": "Monthly Cost Budget Warning Topic",
+        "TopicName": "MonthlyCostBudgetWarningTopic",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+  },
+  "Rules": Object {
+    "CheckBootstrapVersion": Object {
+      "Assertions": Array [
+        Object {
+          "Assert": Object {
+            "Fn::Not": Array [
+              Object {
+                "Fn::Contains": Array [
+                  Array [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  Object {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

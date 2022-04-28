@@ -1,9 +1,10 @@
 import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
-import { Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
+import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { CloudFormationCreateUpdateStackAction, CodeBuildAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Construct } from 'constructs';
 import { ServiceStack } from './service-stack';
+import { BillingStack } from './billing-stack';
 
 export class PipelineStack extends Stack {
   private readonly pipeline: Pipeline;
@@ -18,9 +19,9 @@ export class PipelineStack extends Stack {
    this.pipeline = this._createCodePipeline();
   }
 
-  public addDeployStage(serviceStack: ServiceStack, stageName: string): void {
+  public addDeployStage(serviceStack: ServiceStack, stageName: string): IStage {
 
-    this.pipeline.addStage({
+    return this.pipeline.addStage({
       stageName,
       actions: [
         new CloudFormationCreateUpdateStackAction({
@@ -37,6 +38,17 @@ export class PipelineStack extends Stack {
         })
       ]
     });
+  }
+
+  public addBillingStackToDeployStage(billingStack: BillingStack, stage: IStage): void {
+
+    stage.addAction(new CloudFormationCreateUpdateStackAction({
+      actionName: 'BudgetWarning_Update',
+      stackName: billingStack.stackName,
+      templatePath: this.cdkBuildOutput.atPath(`${billingStack.stackName}.template.json`),
+      adminPermissions: true,
+    }));
+  
   }
 
   private _createCodePipeline(): Pipeline {
