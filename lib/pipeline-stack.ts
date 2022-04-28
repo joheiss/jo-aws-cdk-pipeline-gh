@@ -1,7 +1,7 @@
 import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
-import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
+import { BuildEnvironmentVariableType, BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
 import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
-import { CloudFormationCreateUpdateStackAction, CodeBuildAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
+import { CloudFormationCreateUpdateStackAction, CodeBuildAction, CodeBuildActionType, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Construct } from 'constructs';
 import { ServiceStack } from './service-stack';
 import { BillingStack } from './billing-stack';
@@ -40,6 +40,27 @@ export class PipelineStack extends Stack {
     });
   }
 
+  public addTestToStage(stage: IStage, serviceEndpoint: string): void {
+
+    stage.addAction(new CodeBuildAction({
+      actionName: 'Service_Test',
+      input: this.serviceSourceOutput,
+      project: new PipelineProject(this, 'ServiceTestBuildProject', {
+        environment: {
+          buildImage: LinuxBuildImage.STANDARD_5_0,
+        },
+        buildSpec: BuildSpec.fromSourceFilename('buildspecs/test-buildSpec.yml'),
+      }),
+      environmentVariables: {
+        SERVICE_ENDPOINT: {
+          value: serviceEndpoint,
+          type: BuildEnvironmentVariableType.PLAINTEXT,
+        },
+      },
+      type: CodeBuildActionType.TEST,
+      runOrder: 2,
+    }));
+  }
   public addBillingStackToDeployStage(billingStack: BillingStack, stage: IStage): void {
 
     stage.addAction(new CloudFormationCreateUpdateStackAction({

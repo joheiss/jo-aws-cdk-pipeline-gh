@@ -19,5 +19,7 @@ const serviceStackProd = new ServiceStack(app, 'ServiceStack-Prod', {
 const billingStack = new BillingStack(app, 'BillingStack');
 
 const testDeployStage = pipelineStack.addDeployStage(serviceStackTest, 'Service_Deploy_Test');
+pipelineStack.addTestToStage(testDeployStage, serviceStackTest.serviceEndpointOutput.importValue)
+
 const prodDeployStage = pipelineStack.addDeployStage(serviceStackProd, 'Service_Deploy_Prod');
 pipelineStack.addBillingStackToDeployStage(billingStack, prodDeployStage);
