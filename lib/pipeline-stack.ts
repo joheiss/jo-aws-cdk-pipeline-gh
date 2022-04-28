@@ -3,8 +3,10 @@ import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-cod
 import { Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { CloudFormationCreateUpdateStackAction, CodeBuildAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Construct } from 'constructs';
+import { ServiceStack } from './service-stack';
 
 export class PipelineStack extends Stack {
+  private readonly pipeline: Pipeline;
   private cdkSourceOutput: Artifact;
   private serviceSourceOutput: Artifact;
   private cdkBuildOutput: Artifact;
@@ -13,9 +15,29 @@ export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const pipeline = this._createCodePipeline();
+   this.pipeline = this._createCodePipeline();
   }
 
+  public addDeployStage(serviceStack: ServiceStack, stageName: string): void {
+
+    this.pipeline.addStage({
+      stageName,
+      actions: [
+        new CloudFormationCreateUpdateStackAction({
+          actionName: 'Service_Update',
+          stackName: serviceStack.stackName,
+          templatePath: this.cdkBuildOutput.atPath(`${serviceStack.stackName}.template.json`),
+          adminPermissions: true,
+          parameterOverrides: {
+            ...serviceStack.serviceCode.assign(this.serviceBuildOutput.s3Location),
+          },
+          extraInputs: [
+            this.serviceBuildOutput
+          ],
+        })
+      ]
+    });
+  }
 
   private _createCodePipeline(): Pipeline {
     
@@ -124,4 +146,5 @@ export class PipelineStack extends Stack {
       ]
     });
   }
+  
 }
