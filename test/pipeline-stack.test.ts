@@ -26,7 +26,7 @@ describe('Pipeline Stack', () => {
         let stage: IStage;
 
         beforeEach(() => {
-            serviceStack = new ServiceStack(app, 'ServiceStack');            
+            serviceStack = new ServiceStack(app, 'ServiceStack', { stageName: 'Test' });            
             stage = stack.addDeployStage(serviceStack, 'Deploy');
         });
     
