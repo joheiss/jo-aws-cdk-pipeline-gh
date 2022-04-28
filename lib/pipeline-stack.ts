@@ -68,7 +68,7 @@ export class PipelineStack extends Stack {
     const testAction = new CodeBuildAction({
       actionName: "Service_Test",
       input: this.serviceSourceOutput,
-      project: new PipelineProject(this, "ServiceTestBuildProject", {
+      project: new PipelineProject(this, "JoServiceTestBuildProject", {
         environment: {
           buildImage: LinuxBuildImage.STANDARD_5_0,
         },
@@ -137,8 +137,8 @@ export class PipelineStack extends Stack {
 
   private _createCodePipeline(): Pipeline {
     // create code pipeline
-    const pipeline = new Pipeline(this, "Pipeline", {
-      pipelineName: "Pipeline",
+    const pipeline = new Pipeline(this, "JoPipeline", {
+      pipelineName: "JoPipeline",
       crossAccountKeys: false,
       restartExecutionOnUpdate: true,
     });
@@ -197,7 +197,7 @@ export class PipelineStack extends Stack {
           actionName: "Pipeline_Build",
           input: this.cdkSourceOutput,
           outputs: [this.cdkBuildOutput],
-          project: new PipelineProject(this, "CdkBuildProject", {
+          project: new PipelineProject(this, "JoCdkBuildProject", {
             environment: {
               buildImage: LinuxBuildImage.STANDARD_5_0,
             },
@@ -210,7 +210,7 @@ export class PipelineStack extends Stack {
           actionName: "Service_Build",
           input: this.serviceSourceOutput,
           outputs: [this.serviceBuildOutput],
-          project: new PipelineProject(this, "ServiceBuildProject", {
+          project: new PipelineProject(this, "JoServiceBuildProject", {
             environment: {
               buildImage: LinuxBuildImage.STANDARD_5_0,
             },
