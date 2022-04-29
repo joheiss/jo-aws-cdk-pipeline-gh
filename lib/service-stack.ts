@@ -3,6 +3,11 @@ import { ApiBase } from "@aws-cdk/aws-apigatewayv2-alpha/lib/common/base";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { CfnOutput, Duration, Stack, StackProps } from "aws-cdk-lib";
 import {
+  LambdaDeploymentConfig,
+  LambdaDeploymentGroup,
+} from "aws-cdk-lib/aws-codedeploy";
+import {
+  Alias,
   Architecture,
   CfnParametersCode,
   Code,
@@ -32,17 +37,30 @@ export class ServiceStack extends Stack {
       handler: "src/lambda.handler",
       code: this.serviceCode,
       functionName: `ServiceLambda${props.stageName}`,
+      description: `generated on ${new Date().toISOString()}`, // make sure a change is re-deployed on every CDK build
+    });
+
+    // create a lambda alias
+    const alias = new Alias(this, "ServiceLambdaAlias", {
+      version: lambdaFn.currentVersion,
+      aliasName: `ServiceLambdaAlias${props.stageName}`,
     });
 
     // create HTTP API
     const api = new HttpApi(this, "ServiceApi", {
-      defaultIntegration: new HttpLambdaIntegration(
-        "LambdaIntegration",
-        lambdaFn
-      ),
+      defaultIntegration: new HttpLambdaIntegration("LambdaIntegration", alias),
       apiName: `JoService${props.stageName}`,
     });
 
+    // create Lambda Deployment Group - for Prod stage only
+    if (props.stageName === "Prod") {
+      new LambdaDeploymentGroup(this, "DeploymentGroup", {
+        alias: alias,
+        deploymentConfig: LambdaDeploymentConfig.CANARY_10PERCENT_5MINUTES,
+      });
+    }
+
+    // create Output for API endpoint
     this.serviceEndpointOutput = new CfnOutput(this, "ApiEndPointOutput", {
       exportName: `JoServiceEndpoint${props.stageName}`,
       value: api.apiEndpoint,
