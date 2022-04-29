@@ -2,6 +2,7 @@ import { HttpApi } from "@aws-cdk/aws-apigatewayv2-alpha";
 import { ApiBase } from "@aws-cdk/aws-apigatewayv2-alpha/lib/common/base";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { CfnOutput, Duration, Stack, StackProps } from "aws-cdk-lib";
+import { Statistic, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
 import {
   LambdaDeploymentConfig,
   LambdaDeploymentGroup,
@@ -57,6 +58,24 @@ export class ServiceStack extends Stack {
       new LambdaDeploymentGroup(this, "DeploymentGroup", {
         alias: alias,
         deploymentConfig: LambdaDeploymentConfig.CANARY_10PERCENT_5MINUTES,
+        autoRollback: {
+          deploymentInAlarm: true,
+        },
+        alarms: [
+          api
+            .metricServerError()
+            .with({
+              period: Duration.minutes(1),
+              statistic: Statistic.SUM,
+            })
+            .createAlarm(this, "ServiceErrorAlarm", {
+              threshold: 1,
+              alarmDescription: "Service is experiencing errors",
+              alarmName: `ServiceErrorAlarm${props.stageName}`,
+              evaluationPeriods: 1,
+              treatMissingData: TreatMissingData.NOT_BREACHING,
+            }),
+        ],
       });
     }
 
