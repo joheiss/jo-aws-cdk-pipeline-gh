@@ -31,15 +31,14 @@ export class PipelineStack extends Stack {
   private cdkBuildOutput: Artifact;
   private serviceBuildOutput: Artifact;
   private readonly snsTopic: Topic;
-  private readonly emailAddress?: string;
+  private readonly emailAddress: string;
 
   constructor(scope: Construct, id: string, props?: PipelineStackProps) {
     super(scope, id, props);
 
-    if (props?.ownerEmail && props.ownerEmail.length > 3) {
-      this.emailAddress = props.ownerEmail;
-      this.snsTopic = this._createSnsTopic();
-    }
+    this.emailAddress = props?.ownerEmail || "aws-lab@jovisco.de";
+    this.snsTopic = this._createSnsTopic();
+
     this.pipeline = this._createCodePipeline();
   }
 
@@ -131,7 +130,7 @@ export class PipelineStack extends Stack {
       topicName: "NotifyOnFailedPipeline",
     });
 
-    // topic.addSubscription(new EmailSubscription(this.emailAddress!, { json: false }));
+    topic.addSubscription(new EmailSubscription(this.emailAddress));
 
     return topic;
   }
