@@ -24,10 +24,11 @@ const testDeployStage = pipelineStack.addDeployStage(
   serviceStackTest,
   "Service_Deploy_Test"
 );
-// pipelineStack.addTestToStage(
-//   testDeployStage,
-//   serviceStackTest.serviceEndpointOutput.importValue
-// );
+// this step is BAD - it's producing a circular reference to the service stack :-(
+pipelineStack.addTestToStage(
+  testDeployStage,
+  serviceStackTest.serviceEndpointOutput.importValue
+);
 
 const prodDeployStage = pipelineStack.addDeployStage(
   serviceStackProd,
