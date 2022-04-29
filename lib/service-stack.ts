@@ -15,6 +15,8 @@ import {
   Function,
   Runtime,
 } from "aws-cdk-lib/aws-lambda";
+import { Topic } from "aws-cdk-lib/aws-sns";
+import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 import { Construct } from "constructs";
 import { ServiceHealthCanary } from "./constructs/service-health-canary";
 
@@ -62,7 +64,11 @@ export class ServiceStack extends Stack {
     // create Lambda Deployment Group - for Prod stage only
     if (props.stageName === "Prod") {
       this._createLambdaDeploymentGroup(props.stageName);
-      this._createServiceHealthCanary();
+      const alarmTopic = new Topic(this, "ServiceAlarmTopic", {
+        topicName: "ServiceAlarmTopic",
+      });
+      alarmTopic.addSubscription(new EmailSubscription("aws-lab@jovisco.de"));
+      this._createServiceHealthCanary(alarmTopic);
     }
 
     // create Output for API endpoint
@@ -98,10 +104,11 @@ export class ServiceStack extends Stack {
     });
   }
 
-  private _createServiceHealthCanary(): void {
+  private _createServiceHealthCanary(alarmTopic: Topic): void {
     new ServiceHealthCanary(this, "ServiceHealthCanary", {
       apiEndpoint: this.api.apiEndpoint,
       canaryName: "service-canary",
+      alarmTopic,
     });
   }
 }

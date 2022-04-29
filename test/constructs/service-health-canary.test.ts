@@ -1,5 +1,6 @@
 import { App, Stack } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
+import { Topic } from "aws-cdk-lib/aws-sns";
 import { ServiceHealthCanary } from "../../lib/constructs/service-health-canary";
 
 describe("Testing the Canary", () => {
@@ -15,6 +16,7 @@ describe("Testing the Canary", () => {
     new ServiceHealthCanary(stack, "TestCanary", {
       apiEndpoint: "api.example.com",
       canaryName: "test-canary",
+      alarmTopic: new Topic(stack, "TestAlarmTopic"),
     });
 
     Template.fromStack(stack).hasResourceProperties("AWS::Synthetics::Canary", {
