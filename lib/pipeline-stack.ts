@@ -130,7 +130,7 @@ export class PipelineStack extends Stack {
       topicName: "NotifyOnFailedPipeline",
     });
 
-    topic.addSubscription(new EmailSubscription(this.emailAddress));
+    // topic.addSubscription(new EmailSubscription(this.emailAddress));
 
     return topic;
   }
