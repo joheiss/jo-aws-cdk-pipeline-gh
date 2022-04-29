@@ -16,7 +16,7 @@ import {
   Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
-import { ServiceHealthCanary } from './constructs/service-health-canary';
+import { ServiceHealthCanary } from "./constructs/service-health-canary";
 
 interface ServiceStackProps extends StackProps {
   stageName: string;
@@ -52,7 +52,10 @@ export class ServiceStack extends Stack {
 
     // create HTTP API
     this.api = new HttpApi(this, "ServiceApi", {
-      defaultIntegration: new HttpLambdaIntegration("LambdaIntegration", this.alias),
+      defaultIntegration: new HttpLambdaIntegration(
+        "LambdaIntegration",
+        this.alias
+      ),
       apiName: `JoService${props.stageName}`,
     });
 
@@ -96,10 +99,9 @@ export class ServiceStack extends Stack {
   }
 
   private _createServiceHealthCanary(): void {
-      new ServiceHealthCanary(this, 'ServiceHealthCanary', {
-          apiEndpoint: this.api.apiEndpoint,
-          canaryName: 'ServiceHealthCanary',
-      });
+    new ServiceHealthCanary(this, "ServiceHealthCanary", {
+      apiEndpoint: this.api.apiEndpoint,
+      canaryName: "service-canary",
+    });
   }
-
 }
