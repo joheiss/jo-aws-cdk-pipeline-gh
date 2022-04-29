@@ -16,6 +16,7 @@ import {
   Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
+import { ServiceHealthCanary } from './constructs/service-health-canary';
 
 interface ServiceStackProps extends StackProps {
   stageName: string;
@@ -23,6 +24,8 @@ interface ServiceStackProps extends StackProps {
 export class ServiceStack extends Stack {
   public readonly serviceCode: CfnParametersCode;
   public readonly serviceEndpointOutput: CfnOutput;
+  private readonly alias: Alias;
+  private readonly api: HttpApi;
 
   constructor(scope: Construct, id: string, props: ServiceStackProps) {
     super(scope, id, props);
@@ -42,48 +45,61 @@ export class ServiceStack extends Stack {
     });
 
     // create a lambda alias
-    const alias = new Alias(this, "ServiceLambdaAlias", {
+    this.alias = new Alias(this, "ServiceLambdaAlias", {
       version: lambdaFn.currentVersion,
       aliasName: `ServiceLambdaAlias${props.stageName}`,
     });
 
     // create HTTP API
-    const api = new HttpApi(this, "ServiceApi", {
-      defaultIntegration: new HttpLambdaIntegration("LambdaIntegration", alias),
+    this.api = new HttpApi(this, "ServiceApi", {
+      defaultIntegration: new HttpLambdaIntegration("LambdaIntegration", this.alias),
       apiName: `JoService${props.stageName}`,
     });
 
     // create Lambda Deployment Group - for Prod stage only
     if (props.stageName === "Prod") {
-      new LambdaDeploymentGroup(this, "DeploymentGroup", {
-        alias: alias,
-        deploymentConfig: LambdaDeploymentConfig.CANARY_10PERCENT_5MINUTES,
-        autoRollback: {
-          deploymentInAlarm: true,
-        },
-        alarms: [
-          api
-            .metricServerError()
-            .with({
-              period: Duration.minutes(1),
-              statistic: Statistic.SUM,
-            })
-            .createAlarm(this, "ServiceErrorAlarm", {
-              threshold: 1,
-              alarmDescription: "Service is experiencing errors",
-              alarmName: `ServiceErrorAlarm${props.stageName}`,
-              evaluationPeriods: 1,
-              treatMissingData: TreatMissingData.NOT_BREACHING,
-            }),
-        ],
-      });
+      this._createLambdaDeploymentGroup(props.stageName);
+      this._createServiceHealthCanary();
     }
 
     // create Output for API endpoint
     this.serviceEndpointOutput = new CfnOutput(this, "ApiEndPointOutput", {
       exportName: `JoServiceEndpoint${props.stageName}`,
-      value: api.apiEndpoint,
+      value: this.api.apiEndpoint,
       description: "API Endpoint",
     });
   }
+
+  private _createLambdaDeploymentGroup(stageName: string): void {
+    new LambdaDeploymentGroup(this, "DeploymentGroup", {
+      alias: this.alias,
+      deploymentConfig: LambdaDeploymentConfig.CANARY_10PERCENT_5MINUTES,
+      autoRollback: {
+        deploymentInAlarm: true,
+      },
+      alarms: [
+        this.api
+          .metricServerError()
+          .with({
+            period: Duration.minutes(1),
+            statistic: Statistic.SUM,
+          })
+          .createAlarm(this, "ServiceErrorAlarm", {
+            threshold: 1,
+            alarmDescription: "Service is experiencing errors",
+            alarmName: `ServiceErrorAlarm${stageName}`,
+            evaluationPeriods: 1,
+            treatMissingData: TreatMissingData.NOT_BREACHING,
+          }),
+      ],
+    });
+  }
+
+  private _createServiceHealthCanary(): void {
+      new ServiceHealthCanary(this, 'ServiceHealthCanary', {
+          apiEndpoint: this.api.apiEndpoint,
+          canaryName: 'ServiceHealthCanary',
+      });
+  }
+
 }
