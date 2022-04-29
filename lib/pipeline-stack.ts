@@ -18,6 +18,7 @@ import { BillingStack } from "./billing-stack";
 import { Topic } from "aws-cdk-lib/aws-sns";
 import { SnsTopic } from "aws-cdk-lib/aws-events-targets";
 import { EventField, RuleTargetInput } from "aws-cdk-lib/aws-events";
+import { EmailSubscription } from "aws-cdk-lib/aws-sns-subscriptions";
 
 interface PipelineStackProps extends StackProps {
   ownerEmail?: string;
@@ -35,7 +36,7 @@ export class PipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: PipelineStackProps) {
     super(scope, id, props);
 
-    if (props?.ownerEmail) {
+    if (props?.ownerEmail && props.ownerEmail.length > 3) {
       this.emailAddress = props.ownerEmail;
       this.snsTopic = this._createSnsTopic();
     }
@@ -130,7 +131,7 @@ export class PipelineStack extends Stack {
       topicName: "NotifyOnFailedPipeline",
     });
 
-    // topic.addSubscription(new EmailSubscription(this.emailAddress!));
+    topic.addSubscription(new EmailSubscription(this.emailAddress!, {}));
 
     return topic;
   }
