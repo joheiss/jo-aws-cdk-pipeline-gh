@@ -24,10 +24,10 @@ const testDeployStage = pipelineStack.addDeployStage(
   serviceStackTest,
   "Service_Deploy_Test"
 );
-pipelineStack.addTestToStage(
-  testDeployStage,
-  serviceStackTest.serviceEndpointOutput.importValue
-);
+// pipelineStack.addTestToStage(
+//   testDeployStage,
+//   serviceStackTest.serviceEndpointOutput.importValue
+// );
 
 const prodDeployStage = pipelineStack.addDeployStage(
   serviceStackProd,
