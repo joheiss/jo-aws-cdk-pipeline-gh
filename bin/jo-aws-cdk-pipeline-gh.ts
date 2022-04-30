@@ -8,7 +8,7 @@ import { BillingStack } from "../lib/billing-stack";
 const app = new cdk.App();
 
 const pipelineStack = new PipelineStack(app, "JoPipelineStack", {
-  ownerEmail: "aws-lab@jovisco.de ",
+  ownerEmail: "aws-lab@jovisco.de",
 });
 const serviceStackTest = new ServiceStack(app, "JoServiceStack-Test", {
   stageName: "Test",

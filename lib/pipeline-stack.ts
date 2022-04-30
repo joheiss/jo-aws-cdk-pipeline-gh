@@ -127,7 +127,7 @@ export class PipelineStack extends Stack {
 
   private _createSnsTopic(): Topic {
     const topic = new Topic(this, "NotifyOnFailedPipeline", {
-      topicName: "NotifyOnFailedPipeline",
+      // topicName: "NotifyOnFailedPipeline",
     });
 
     const emailSub = new EmailSubscription(this.emailAddress);
