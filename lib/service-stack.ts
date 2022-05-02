@@ -1,5 +1,4 @@
 import { HttpApi } from "@aws-cdk/aws-apigatewayv2-alpha";
-import { ApiBase } from "@aws-cdk/aws-apigatewayv2-alpha/lib/common/base";
 import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import { CfnOutput, Duration, Stack, StackProps } from "aws-cdk-lib";
 import { Statistic, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
