@@ -142,7 +142,7 @@ export class PipelineStack extends Stack {
     // create code pipeline
     const pipeline = new Pipeline(this, "JoPipeline", {
       pipelineName: "JoPipeline",
-      crossAccountKeys: false,
+      crossAccountKeys: true, // create a KMS key that costs $1 a month - needed for cross account
       restartExecutionOnUpdate: true,
     });
 

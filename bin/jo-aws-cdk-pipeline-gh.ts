@@ -16,6 +16,11 @@ const backupEnv: Environment = {
   region: 'us-east-1'
 };
 
+const sandboxAccountEnv = {
+  account: '716917798878',
+  region: 'eu-central-1'
+};
+
 const app = new cdk.App();
 
 const pipelineStack = new PipelineStack(app, "JoPipelineStack", {
@@ -24,6 +29,11 @@ const pipelineStack = new PipelineStack(app, "JoPipelineStack", {
 });
 const serviceStackTest = new ServiceStack(app, "JoServiceStack-Test", {
   env: mainEnv,
+  stageName: "Test",
+});
+
+const serviceStackSandboxAccountTest = new ServiceStack(app, "JoServiceStackSandbox-Test", {
+  env: sandboxAccountEnv,
   stageName: "Test",
 });
 
@@ -61,3 +71,9 @@ pipelineStack.addDeployStage(
   serviceStackBackupProd,
   "Service_Backup_Prod"
 );
+
+// new stage for sandbox account
+pipelineStack.addDeployStage(
+  serviceStackSandboxAccountTest,
+  "Service_CrossAccount_Test"
+)
