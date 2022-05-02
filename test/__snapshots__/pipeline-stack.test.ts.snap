@@ -76,15 +76,7 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":logs:",
-                      Object {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/codebuild/",
+                      ":logs:us-east-1:123456789:log-group:/aws/codebuild/",
                       Object {
                         "Ref": "JoCdkBuildProjectE31CC639",
                       },
@@ -99,15 +91,7 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":logs:",
-                      Object {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/codebuild/",
+                      ":logs:us-east-1:123456789:log-group:/aws/codebuild/",
                       Object {
                         "Ref": "JoCdkBuildProjectE31CC639",
                       },
@@ -134,15 +118,7 @@ Object {
                     Object {
                       "Ref": "AWS::Partition",
                     },
-                    ":codebuild:",
-                    Object {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    Object {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":report-group/",
+                    ":codebuild:us-east-1:123456789:report-group/",
                     Object {
                       "Ref": "JoCdkBuildProjectE31CC639",
                     },
@@ -464,11 +440,7 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":iam::",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":root",
+                      ":iam::123456789:root",
                     ],
                   ],
                 },
@@ -526,11 +498,7 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":iam::",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":root",
+                      ":iam::123456789:root",
                     ],
                   ],
                 },
@@ -730,11 +698,7 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":iam::",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":root",
+                      ":iam::123456789:root",
                     ],
                   ],
                 },
@@ -809,15 +773,7 @@ Object {
                     Object {
                       "Ref": "AWS::Partition",
                     },
-                    ":cloudformation:",
-                    Object {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    Object {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":stack/PipelineStack/*",
+                    ":cloudformation:us-east-1:123456789:stack/PipelineStack/*",
                   ],
                 ],
               },
@@ -968,15 +924,7 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":logs:",
-                      Object {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/codebuild/",
+                      ":logs:us-east-1:123456789:log-group:/aws/codebuild/",
                       Object {
                         "Ref": "JoServiceBuildProjectAA647C41",
                       },
@@ -991,15 +939,7 @@ Object {
                       Object {
                         "Ref": "AWS::Partition",
                       },
-                      ":logs:",
-                      Object {
-                        "Ref": "AWS::Region",
-                      },
-                      ":",
-                      Object {
-                        "Ref": "AWS::AccountId",
-                      },
-                      ":log-group:/aws/codebuild/",
+                      ":logs:us-east-1:123456789:log-group:/aws/codebuild/",
                       Object {
                         "Ref": "JoServiceBuildProjectAA647C41",
                       },
@@ -1026,15 +966,7 @@ Object {
                     Object {
                       "Ref": "AWS::Partition",
                     },
-                    ":codebuild:",
-                    Object {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    Object {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":report-group/",
+                    ":codebuild:us-east-1:123456789:report-group/",
                     Object {
                       "Ref": "JoServiceBuildProjectAA647C41",
                     },
@@ -1093,10 +1025,17 @@ Object {
       "Type": "AWS::IAM::Policy",
     },
     "NotifyOnFailedPipeline67CBA9FC": Object {
-      "Properties": Object {
-        "TopicName": "NotifyOnFailedPipeline",
-      },
       "Type": "AWS::SNS::Topic",
+    },
+    "NotifyOnFailedPipelinetesttestdeFF5239F1": Object {
+      "Properties": Object {
+        "Endpoint": "test@test.de",
+        "Protocol": "email",
+        "TopicArn": Object {
+          "Ref": "NotifyOnFailedPipeline67CBA9FC",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
   },
   "Rules": Object {

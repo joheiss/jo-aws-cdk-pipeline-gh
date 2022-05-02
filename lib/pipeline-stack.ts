@@ -47,6 +47,8 @@ export class PipelineStack extends Stack {
       stageName,
       actions: [
         new CloudFormationCreateUpdateStackAction({
+          account: serviceStack.account,
+          region: serviceStack.region,
           actionName: "Service_Update",
           stackName: serviceStack.stackName,
           templatePath: this.cdkBuildOutput.atPath(

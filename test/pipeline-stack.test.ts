@@ -5,6 +5,11 @@ import { PipelineStack } from "../lib/pipeline-stack";
 import { ServiceStack } from "../lib/service-stack";
 import { BillingStack } from "../lib/billing-stack";
 
+const testEnv = {
+  account: '123456789',
+  region: 'us-east-1'
+};
+
 describe("Pipeline Stack", () => {
   let app: App;
   let stack: PipelineStack;
@@ -12,6 +17,7 @@ describe("Pipeline Stack", () => {
   beforeEach(() => {
     app = new App();
     stack = new PipelineStack(app, "PipelineStack", {
+      env: testEnv,
       ownerEmail: "test@test.de",
     });
   });
@@ -27,6 +33,7 @@ describe("Pipeline Stack", () => {
 
     beforeEach(() => {
       serviceStack = new ServiceStack(app, "ServiceStack", {
+        env: testEnv,
         stageName: "Test",
       });
       stage = stack.addDeployStage(serviceStack, "Deploy");
